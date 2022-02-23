@@ -22,7 +22,7 @@ import it.airgap.beaconsdk.core.message.PermissionBeaconRequest
  * @property [network] The network to which the permissions apply.
  * @property [scopes] The list of permissions asked to be granted.
  */
-public data class PermissionTezosRequest internal constructor(
+public data class PermissionTezosRequest constructor(
     override val id: String,
     override val version: String,
     override val blockchainIdentifier: String,

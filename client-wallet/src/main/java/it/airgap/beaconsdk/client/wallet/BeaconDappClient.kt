@@ -203,6 +203,8 @@ public class BeaconDappClient @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constr
         storageManager.removePermissions()
     }
 
+    public suspend fun request(request: BeaconRequest): Result<Unit> = send(request, true)
+
     protected override suspend fun processMessage(message: BeaconMessage): Result<Unit> =
         super.processMessage(message)
 
