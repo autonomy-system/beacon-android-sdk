@@ -27,7 +27,7 @@ public abstract class BeaconClient<BM : BeaconMessage>(
     public val beaconId: String,
     public val connectionController: ConnectionController,
     public val messageController: MessageController,
-    protected val storageManager: StorageManager,
+    public val storageManager: StorageManager,
     protected val crypto: Crypto,
 ) {
 
