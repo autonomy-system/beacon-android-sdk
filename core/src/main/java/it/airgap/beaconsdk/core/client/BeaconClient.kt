@@ -25,8 +25,8 @@ import kotlinx.coroutines.flow.onEach
 public abstract class BeaconClient<BM : BeaconMessage>(
     public val name: String,
     public val beaconId: String,
-    protected val connectionController: ConnectionController,
-    protected val messageController: MessageController,
+    public val connectionController: ConnectionController,
+    public val messageController: MessageController,
     protected val storageManager: StorageManager,
     protected val crypto: Crypto,
 ) {
