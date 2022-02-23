@@ -61,6 +61,10 @@ public class MessageController internal constructor(
             Pair(message.associatedOrigin, VersionedBeaconMessage.from(senderId, message))
         }
 
+    public fun senderIdentifier(publicKey: String): Result<String> = runCatching {
+        identifierCreator.senderId(publicKey.asHexString().toByteArray()).getOrThrow()
+    }
+
     private suspend fun onOutgoingResponse(response: BeaconResponse, isTerminal: Boolean) {
         val request = pendingRequests.get(response.id, remove = isTerminal) ?: failWithNoPendingRequest()
         when (response) {

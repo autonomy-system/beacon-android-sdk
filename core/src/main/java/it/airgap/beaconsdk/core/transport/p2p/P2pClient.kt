@@ -3,7 +3,11 @@ package it.airgap.beaconsdk.core.transport.p2p
 import it.airgap.beaconsdk.core.data.P2pPeer
 import it.airgap.beaconsdk.core.internal.di.DependencyRegistry
 import it.airgap.beaconsdk.core.internal.transport.p2p.data.P2pMessage
+import it.airgap.beaconsdk.core.internal.transport.p2p.data.P2pPairingResponse
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
+import kotlinx.serialization.json.Json
 
 /**
  * Base for different P2P implementations provided in Beacon.
@@ -34,6 +38,10 @@ public interface P2pClient {
      * Sends a pairing message to the specified [peer].
      */
     public suspend fun sendPairingResponse(peer: P2pPeer): Result<Unit>
+
+    public fun listenForChannelOpening(): Flow<Result<P2pPeer>>
+
+    public fun getRelayServers(): List<String>
 
     /**
      * Creator for [P2pClient] instances.

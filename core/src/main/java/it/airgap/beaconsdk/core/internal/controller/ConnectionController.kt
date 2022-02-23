@@ -2,6 +2,7 @@ package it.airgap.beaconsdk.core.internal.controller
 
 import androidx.annotation.RestrictTo
 import it.airgap.beaconsdk.core.data.Connection
+import it.airgap.beaconsdk.core.data.P2pPeer
 import it.airgap.beaconsdk.core.exception.ConnectionException
 import it.airgap.beaconsdk.core.exception.MultipleConnectionException
 import it.airgap.beaconsdk.core.internal.message.BeaconConnectionMessage
@@ -47,6 +48,19 @@ public class ConnectionController internal constructor(private val transports: L
 
         content.map { BeaconConnectionMessage(message.origin, it) }
     }
+
+    public fun startOpenChannelListener(): Flow<Result<P2pPeer>> = transports
+        .map { transport ->
+            transport.startOpenChannelListener()
+        }
+        .merge()
+
+    public fun getRelayServers(): List<String> = transports
+        .map {
+            it.getRelayServers()
+        }
+        .flatten()
+        .toList()
 
     private fun Result<Unit>.concat(other: Result<Unit>, connectionType: Connection.Type): Result<Unit> {
         onSuccess {

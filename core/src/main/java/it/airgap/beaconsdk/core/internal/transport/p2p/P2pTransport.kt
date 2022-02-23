@@ -72,6 +72,15 @@ internal class P2pTransport(
         }
     }
 
+    override fun startOpenChannelListener() = client.listenForChannelOpening()
+            .onEach {
+                it.getOrNull()?.let { peer ->
+                    storageManager.addPeers(listOf(peer))
+                }
+            }
+
+    override fun getRelayServers(): List<String> = client.getRelayServers()
+
     private fun failWithUnknownPeer(publicKey: String): Nothing =
         throw IllegalStateException("P2P peer with public key $publicKey is not recognized.")
 

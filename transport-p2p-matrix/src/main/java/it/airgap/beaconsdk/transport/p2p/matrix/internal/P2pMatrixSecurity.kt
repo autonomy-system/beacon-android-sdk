@@ -44,6 +44,10 @@ internal class P2pMatrixSecurity(private val app: BeaconApplication, private val
             publicKey,
         )
 
+    fun decryptPairingPayload(message: String): Result<ByteArray> =
+        if (message.isHex()) crypto.decryptMessageWithKeyPair(message.asHexString().toByteArray(), keyPair.publicKey, keyPair.privateKey)
+        else crypto.decryptMessageWithKeyPair(message.encodeToByteArray(), keyPair.publicKey, keyPair.privateKey)
+
     fun encrypt(publicKey: ByteArray, message: String): Result<String> =
         getOrCreateClientSessionKeyPair(publicKey, keyPair.privateKey)
             .flatMap { crypto.encryptMessageWithSharedKey(message, it.tx) }

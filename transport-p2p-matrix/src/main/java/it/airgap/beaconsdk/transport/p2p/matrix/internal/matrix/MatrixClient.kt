@@ -171,6 +171,8 @@ internal class MatrixClient(
         }
     }
 
+    fun getPollerNodes(): List<String> = syncScopes.keys.toList()
+
     private suspend inline fun <T> withAccessToken(
         name: String,
         block: (accessToken: String) -> T,

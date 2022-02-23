@@ -4,6 +4,7 @@ import it.airgap.beaconsdk.core.data.P2pPeer
 import it.airgap.beaconsdk.core.internal.data.HexString
 import it.airgap.beaconsdk.core.internal.di.DependencyRegistry
 import it.airgap.beaconsdk.core.internal.transport.p2p.data.P2pMessage
+import it.airgap.beaconsdk.core.internal.transport.p2p.data.P2pPairingResponse
 import it.airgap.beaconsdk.core.internal.utils.*
 import it.airgap.beaconsdk.core.internal.utils.delegate.default
 import it.airgap.beaconsdk.core.network.provider.HttpProvider
@@ -24,6 +25,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.json.Json
 import java.util.*
 
 /**
@@ -123,6 +125,29 @@ public class P2pMatrix internal constructor(
 
             matrix.sendTextMessageTo(recipient.asString(), message, newRoom = true).getOrThrow()
         }
+
+    override fun listenForChannelOpening(): Flow<Result<P2pPeer>> = flow {
+            try {
+                matrixMessageEvents
+                    .filter { it.message.contains("@channel-open:") }
+                    .onEach { store.intent(OnChannelEvent(it.sender, it.roomId)) }
+                    .map { it.message.split(":").lastOrNull() ?: "" }
+                    .map { message ->
+                        security.decryptPairingPayload(message)
+                            .map {
+                                val response = Json.decodeFromString(P2pPairingResponse.serializer(), it.toString(Charsets.UTF_8))
+                                response.extractP2PPeer()
+                            }
+                    }
+                    .collect {
+                        emit(it)
+                    }
+            } catch (e: CancellationException) {
+                /* no action */
+            }
+        }
+
+    override fun getRelayServers(): List<String> = matrix.getPollerNodes()
 
     private fun MatrixEvent.isTextMessageFrom(publicKey: ByteArray): Boolean =
         this is MatrixEvent.TextMessage
