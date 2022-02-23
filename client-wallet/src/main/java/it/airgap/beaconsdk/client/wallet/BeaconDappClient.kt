@@ -91,7 +91,7 @@ public class BeaconDappClient @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constr
     messageController: MessageController,
     storageManager: StorageManager,
     crypto: Crypto,
-) : BeaconClient<BeaconRequest>(name, beaconId, connectionController, messageController, storageManager, crypto) {
+) : BeaconClient<BeaconResponse>(name, beaconId, connectionController, messageController, storageManager, crypto) {
 
     /**
      * Sends the [response] in reply to a previously received request.
@@ -204,21 +204,13 @@ public class BeaconDappClient @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) constr
     }
 
     protected override suspend fun processMessage(message: BeaconMessage): Result<Unit> =
-        when (message) {
-            is BeaconRequest -> acknowledge(message)
-            else -> super.processMessage(message)
-        }
+        super.processMessage(message)
 
-    protected override suspend fun transformMessage(message: BeaconMessage): BeaconRequest? =
+    protected override suspend fun transformMessage(message: BeaconMessage): BeaconResponse? =
         when (message) {
-            is BeaconRequest -> message
+            is BeaconResponse -> message
             else -> null
         }
-
-    private suspend fun acknowledge(request: BeaconRequest): Result<Unit> {
-        val acknowledgeResponse = AcknowledgeBeaconResponse.from(request, beaconId)
-        return send(acknowledgeResponse, isTerminal = false)
-    }
 
     public companion object {}
 
