@@ -1,6 +1,7 @@
 package it.airgap.beaconsdk.client.wallet
 
 import androidx.annotation.RestrictTo
+import it.airgap.beaconsdk.blockchain.tezos.data.TezosAppMetadata
 import it.airgap.beaconsdk.core.client.BeaconClient
 import it.airgap.beaconsdk.core.data.AppMetadata
 import it.airgap.beaconsdk.core.data.Connection
@@ -90,7 +91,7 @@ public class BeaconWalletClient @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) cons
     messageController: MessageController,
     storageManager: StorageManager,
     crypto: Crypto,
-) : BeaconClient<BeaconRequest>(name, beaconId, connectionController, messageController, storageManager, crypto) {
+) : BeaconClient<BeaconMessage>(name, beaconId, connectionController, messageController, storageManager, crypto) {
 
     /**
      * Sends the [response] in reply to a previously received request.
@@ -107,6 +108,11 @@ public class BeaconWalletClient @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) cons
      */
     public suspend fun getAppMetadata(): List<AppMetadata> =
         storageManager.getAppMetadata()
+
+    public fun getOwnAppMetadata(): AppMetadata {
+        val senderId = messageController.senderIdentifier(beaconId).getOrNull() ?: ""
+        return TezosAppMetadata(senderId, "Autonomy")
+    }
 
     /**
      * Returns the first app metadata that matches the specified [senderId]
@@ -203,9 +209,10 @@ public class BeaconWalletClient @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) cons
             else -> super.processMessage(message)
         }
 
-    protected override suspend fun transformMessage(message: BeaconMessage): BeaconRequest? =
+    protected override suspend fun transformMessage(message: BeaconMessage): BeaconMessage? =
         when (message) {
             is BeaconRequest -> message
+            is BeaconResponse -> message
             else -> null
         }
 
@@ -213,6 +220,8 @@ public class BeaconWalletClient @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) cons
         val acknowledgeResponse = AcknowledgeBeaconResponse.from(request, beaconId)
         return send(acknowledgeResponse, isTerminal = false)
     }
+
+    public suspend fun request(request: BeaconRequest): Result<Unit> = send(request, true)
 
     public companion object {}
 
