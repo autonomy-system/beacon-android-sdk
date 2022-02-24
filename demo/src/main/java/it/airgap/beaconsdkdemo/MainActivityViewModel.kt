@@ -18,6 +18,7 @@ import it.airgap.beaconsdk.core.message.BeaconRequest
 import it.airgap.beaconsdk.core.message.ErrorBeaconResponse
 import it.airgap.beaconsdk.transport.p2p.matrix.p2pMatrix
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
@@ -44,8 +45,9 @@ class MainActivityViewModel : ViewModel() {
         checkForPeers()
 
         beaconClient?.connect()
+            ?.filter { it.getOrNull() is BeaconRequest }
             ?.onEach { result -> result.getOrNull()?.let { saveAwaitingRequest(it) } }
-            ?.collect { emit(it) }
+            ?.collect { emit(it as Result<BeaconRequest>) }
     }
 
     fun respondExample() {
