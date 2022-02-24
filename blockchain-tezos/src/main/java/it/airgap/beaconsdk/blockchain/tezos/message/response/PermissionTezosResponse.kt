@@ -9,6 +9,7 @@ import it.airgap.beaconsdk.core.data.Origin
 import it.airgap.beaconsdk.core.exception.BeaconException
 import it.airgap.beaconsdk.core.internal.utils.dependencyRegistry
 import it.airgap.beaconsdk.core.message.PermissionBeaconResponse
+import kotlinx.serialization.Serializable
 
 /**
  * Message responding to [PermissionTezosRequest].
@@ -22,6 +23,7 @@ import it.airgap.beaconsdk.core.message.PermissionBeaconResponse
  * @property [network] The network to which the permissions apply.
  * @property [scopes] The list of granted permissions.
  */
+@Serializable
 public data class PermissionTezosResponse internal constructor(
     override val id: String,
     override val version: String,
