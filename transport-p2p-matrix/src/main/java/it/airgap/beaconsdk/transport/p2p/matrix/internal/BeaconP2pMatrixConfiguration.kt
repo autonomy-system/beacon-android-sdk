@@ -13,6 +13,5 @@ internal object BeaconP2pMatrixConfiguration {
 
     val defaultNodes: List<String> = listOf(
         "beacon-node-1.sky.papers.tech",
-        "beacon-node-0.papers.tech:8448",
     )
 }
