@@ -5,14 +5,14 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import it.airgap.beaconsdk.blockchain.tezos.data.TezosAppMetadata
 import it.airgap.beaconsdk.blockchain.tezos.data.TezosPermission
-import it.airgap.beaconsdk.blockchain.tezos.internal.wallet.TezosWallet
-import mockTime
+import it.airgap.beaconsdk.core.internal.BeaconConfiguration
 import it.airgap.beaconsdk.core.internal.storage.MockSecureStorage
 import it.airgap.beaconsdk.core.internal.storage.MockStorage
 import it.airgap.beaconsdk.core.internal.storage.StorageManager
 import it.airgap.beaconsdk.core.internal.utils.IdentifierCreator
 import it.airgap.beaconsdk.core.internal.utils.toHexString
 import kotlinx.coroutines.runBlocking
+import mockTime
 import org.junit.Before
 import org.junit.Test
 import permissionTezosRequest
@@ -21,9 +21,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 
 internal class TezosCreatorTest {
-
-    @MockK
-    private lateinit var wallet: TezosWallet
 
     @MockK
     private lateinit var identifierCreator: IdentifierCreator
@@ -43,14 +40,12 @@ internal class TezosCreatorTest {
 
         mockTime(currentTimeMillis)
 
-        every { wallet.address(any()) } answers { Result.success("@${firstArg<String>()}") }
-
         every { identifierCreator.accountId(any(), any()) } answers { Result.success(firstArg()) }
         every { identifierCreator.senderId(any()) } answers { Result.success(firstArg<ByteArray>().toHexString().asString()) }
 
-        storageManager = StorageManager(MockStorage(), MockSecureStorage(), identifierCreator)
+        storageManager = StorageManager(MockStorage(), MockSecureStorage(), identifierCreator, BeaconConfiguration(ignoreUnsupportedBlockchains = false))
         creator = TezosCreator(
-            DataTezosCreator(wallet, storageManager, identifierCreator),
+            DataTezosCreator(storageManager, identifierCreator),
             V1BeaconMessageTezosCreator(),
             V2BeaconMessageTezosCreator(),
             V3BeaconMessageTezosCreator(),
@@ -70,12 +65,12 @@ internal class TezosCreatorTest {
             val permission = creator.data.extractPermission(permissionRequest, permissionResponse).getOrThrow()
 
             val expected = listOf(TezosPermission(
-                "@${permissionResponse.publicKey}",
+                permissionResponse.account.accountId,
                 appMetadata.senderId,
                 currentTimeMillis,
-                "@${permissionResponse.publicKey}",
-                permissionResponse.publicKey,
-                permissionResponse.network,
+                permissionResponse.account.address,
+                permissionResponse.account.publicKey,
+                permissionResponse.account.network,
                 appMetadata,
                 permissionResponse.scopes,
             ))

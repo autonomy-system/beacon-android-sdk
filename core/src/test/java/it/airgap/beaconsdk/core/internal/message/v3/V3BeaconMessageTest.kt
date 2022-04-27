@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.unmockkAll
 import it.airgap.beaconsdk.core.data.*
+import it.airgap.beaconsdk.core.internal.BeaconConfiguration
 import it.airgap.beaconsdk.core.internal.blockchain.MockBlockchain
 import it.airgap.beaconsdk.core.internal.blockchain.message.*
 import it.airgap.beaconsdk.core.internal.storage.MockSecureStorage
@@ -37,7 +38,7 @@ internal class V3BeaconMessageTest {
     fun setup() {
         MockKAnnotations.init(this)
 
-        storageManager = StorageManager(MockStorage(), MockSecureStorage(), identifierCreator)
+        storageManager = StorageManager(MockStorage(), MockSecureStorage(), identifierCreator, BeaconConfiguration(ignoreUnsupportedBlockchains = false))
 
         val dependencyRegistry = mockDependencyRegistry()
         every { dependencyRegistry.storageManager } returns storageManager
@@ -221,7 +222,6 @@ internal class V3BeaconMessageTest {
         id: String = "id",
         senderId: String = "senderId",
         blockchainIdentifier: String = MockBlockchain.IDENTIFIER,
-        accountIds: List<String> = listOf("accountId"),
         publicKey: String = "publicKey",
         network: Network = MockNetwork(),
         scopes: List<String> = emptyList(),
@@ -232,7 +232,6 @@ internal class V3BeaconMessageTest {
             senderId,
             PermissionV3BeaconResponseContent(
                 blockchainIdentifier,
-                accountIds,
                 V3MockPermissionBeaconResponseData(
                     mapOf(
                         "publicKey" to JsonPrimitive(publicKey),
@@ -249,7 +248,6 @@ internal class V3BeaconMessageTest {
                 "message": {
                     "type": "permission_response",
                     "blockchainIdentifier": "$blockchainIdentifier",
-                    "accountIds": ${Json.encodeToString(accountIds)},
                     "blockchainData": {
                         "publicKey": "$publicKey",
                         "network": ${Json.encodeToString(network)},
@@ -406,7 +404,6 @@ internal class V3BeaconMessageTest {
         id: String = "id",
         senderId: String = "senderId",
         blockchainIdentifier: String = MockBlockchain.IDENTIFIER,
-        accountIds: List<String> = listOf("accountId"),
         publicKey: String = "publicKey",
         network: Network = MockNetwork(),
         scopes: List<String> = emptyList(),
@@ -424,10 +421,9 @@ internal class V3BeaconMessageTest {
             senderId,
             PermissionV3BeaconResponseContent(
                 blockchainIdentifier,
-                accountIds,
                 V3MockPermissionBeaconResponseData(rest),
             ),
-        ) to PermissionMockResponse("permission_response", id, version, origin, blockchainIdentifier, accountIds, rest)
+        ) to PermissionMockResponse("permission_response", id, version, origin, blockchainIdentifier, rest)
     }
 
     private fun createBlockchainResponsePair(
