@@ -4,6 +4,7 @@ import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import it.airgap.beaconsdk.blockchain.tezos.Tezos
+import it.airgap.beaconsdk.blockchain.tezos.data.TezosAccount
 import it.airgap.beaconsdk.blockchain.tezos.data.TezosAppMetadata
 import it.airgap.beaconsdk.blockchain.tezos.data.TezosNetwork
 import it.airgap.beaconsdk.blockchain.tezos.data.TezosPermission
@@ -20,6 +21,7 @@ import it.airgap.beaconsdk.blockchain.tezos.message.response.PermissionTezosResp
 import it.airgap.beaconsdk.blockchain.tezos.message.response.SignPayloadTezosResponse
 import it.airgap.beaconsdk.core.data.Origin
 import it.airgap.beaconsdk.core.data.SigningType
+import it.airgap.beaconsdk.core.internal.BeaconConfiguration
 import it.airgap.beaconsdk.core.internal.message.v2.V2BeaconMessage
 import it.airgap.beaconsdk.core.internal.storage.MockSecureStorage
 import it.airgap.beaconsdk.core.internal.storage.MockStorage
@@ -48,7 +50,7 @@ internal class V2TezosMessageTest {
 
         every { identifierCreator.accountId(any(), any()) } answers { Result.success(firstArg()) }
 
-        storageManager = StorageManager(MockStorage(), MockSecureStorage(), identifierCreator)
+        storageManager = StorageManager(MockStorage(), MockSecureStorage(), identifierCreator, BeaconConfiguration(ignoreUnsupportedBlockchains = false))
 
         val dependencyRegistry = mockDependencyRegistry()
         every { dependencyRegistry.storageManager } returns storageManager
@@ -367,7 +369,7 @@ internal class V2TezosMessageTest {
         origin: Origin = Origin.P2P(senderId),
     ): Pair<PermissionV2TezosResponse, PermissionBeaconResponse> =
         PermissionV2TezosResponse(version, id, senderId, publicKey, network, scopes) to
-            PermissionTezosResponse(id, version, origin, Tezos.IDENTIFIER, listOf(publicKey), publicKey, network, scopes)
+            PermissionTezosResponse(id, version, origin, Tezos.IDENTIFIER, TezosAccount(publicKey, network, publicKey, publicKey), scopes)
 
     private fun createOperationResponsePair(
         version: String = "2",

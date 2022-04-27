@@ -9,6 +9,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.unmockkAll
 import it.airgap.beaconsdk.core.data.MockPermission
 import it.airgap.beaconsdk.core.data.Origin
+import it.airgap.beaconsdk.core.internal.BeaconConfiguration
 import it.airgap.beaconsdk.core.internal.blockchain.MockBlockchain
 import it.airgap.beaconsdk.core.internal.message.VersionedBeaconMessage
 import it.airgap.beaconsdk.core.internal.storage.MockSecureStorage
@@ -53,7 +54,7 @@ internal class MessageControllerTest {
         every { identifierCreator.senderId(any()) } answers { Result.success(firstArg<ByteArray>().toHexString().asString()) }
 
         val dependencyRegistry = mockDependencyRegistry()
-        storageManager = StorageManager(MockStorage(), MockSecureStorage(), identifierCreator)
+        storageManager = StorageManager(MockStorage(), MockSecureStorage(), identifierCreator, BeaconConfiguration(ignoreUnsupportedBlockchains = false))
         messageController = MessageController(dependencyRegistry.blockchainRegistry, storageManager, identifierCreator)
 
         every { dependencyRegistry.storageManager } returns storageManager
@@ -132,14 +133,14 @@ internal class MessageControllerTest {
 
         val appMetadata = runBlocking { storageManager.getAppMetadata().first() }
         val permissions = runBlocking { storageManager.getPermissions() }
-        val expected = permissionResponse.accountIds.map {
+        val expected = listOf(
             MockPermission(
                 MockBlockchain.IDENTIFIER,
-                it,
+                "accountId",
                 appMetadata.senderId,
                 currentTimeMillis
             )
-        }
+        )
 
         assertEquals(expected, permissions)
     }
