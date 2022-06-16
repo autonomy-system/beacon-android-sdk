@@ -16,7 +16,7 @@ import it.airgap.beaconsdk.core.storage.Storage
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 public class BeaconSdk(context: Context) {
-    private var isInitialized: Boolean = false
+//    private var isInitialized: Boolean = false
 
     public val applicationContext: Context = context.applicationContext
 
@@ -44,7 +44,7 @@ public class BeaconSdk(context: Context) {
         storage: Storage,
         secureStorage: SecureStorage,
     ) {
-        if (isInitialized) return
+//        if (isInitialized) return
 
         dependencyRegistry = CoreDependencyRegistry(blockchainFactories, storage, secureStorage, configuration)
 
@@ -55,7 +55,7 @@ public class BeaconSdk(context: Context) {
 
         app = partialApp.toFinal(loadOrGenerateKeyPair(storageManager, crypto))
 
-        isInitialized = true
+//        isInitialized = true
     }
 
     private suspend fun setSdkVersion(storageManager: StorageManager) {
