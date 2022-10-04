@@ -112,7 +112,7 @@ public data class MichelinePrimitiveBytes(public val bytes: String) : MichelineM
         override fun serialize(encoder: Encoder, value: MichelinePrimitiveBytes) {
             encoder.encodeStructure(descriptor) {
                 with(value) {
-                    encodeStringElement(descriptor, 0, HexString(bytes).asString(withPrefix = true))
+                    encodeStringElement(descriptor, 0, if (bytes.isEmpty()) "" else HexString(bytes).asString(withPrefix = true))
                 }
             }
         }
