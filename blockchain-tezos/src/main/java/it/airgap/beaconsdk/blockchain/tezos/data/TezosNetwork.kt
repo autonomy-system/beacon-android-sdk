@@ -130,6 +130,19 @@ public sealed class TezosNetwork : Network() {
         }
     }
 
+    @Serializable
+    @SerialName(Kathmandunet.TYPE)
+    public data class Kathmandunet(
+        override val name: String? = null,
+        override val rpcUrl: String? = null,
+    ) : TezosNetwork() {
+        @Transient
+        override val type: String = TYPE
+
+        public companion object {
+            internal const val TYPE = "kathmandunet"
+        }
+    }
 
     @Serializable
     @SerialName(Custom.TYPE)
