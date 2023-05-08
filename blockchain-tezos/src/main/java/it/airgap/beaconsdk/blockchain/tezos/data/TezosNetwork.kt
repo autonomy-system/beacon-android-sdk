@@ -145,6 +145,20 @@ public sealed class TezosNetwork : Network() {
     }
 
     @Serializable
+    @SerialName(Ghostnet.TYPE)
+    public data class Ghostnet(
+        override val name: String? = null,
+        override val rpcUrl: String? = null,
+    ) : TezosNetwork() {
+        @Transient
+        override val type: String = TYPE
+
+        public companion object {
+            internal const val TYPE = "ghostnet"
+        }
+    }
+
+    @Serializable
     @SerialName(Custom.TYPE)
     public data class Custom(
         override val name: String? = null,
