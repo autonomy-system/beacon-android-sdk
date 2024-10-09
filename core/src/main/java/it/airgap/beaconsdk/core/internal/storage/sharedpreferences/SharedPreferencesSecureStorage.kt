@@ -44,7 +44,7 @@ public class SharedPreferencesSecureStorage(
     }
 
     private enum class FileKey(override val value: String) : SharedPreferencesBaseStorage.Key {
-        SdkSecretKey("sdk_seed"),
+        SdkSecretKey("au_sdk_seed"),
     }
 
     override fun scoped(beaconScope: BeaconScope): SecureStorage =
